@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Hierarchy — Inheritance</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f8f8f6;
+  --white: #ffffff;
+  --ink: #111110;
+  --ink-2: #444440;
+  --ink-3: #999990;
+  --line: #e4e4e0;
+  --line-2: #d0d0ca;
+  --student: #2d6a4f;
+  --teacher: #7b3f00;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; font-weight: 300; }
+.page { max-width: 960px; margin: 0 auto; padding: 0 32px 100px; }
+
+header { padding: 64px 0 48px; border-bottom: 1px solid var(--line-2); margin-bottom: 64px; }
+.eyebrow { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 20px; }
+h1 { font-family: var(--mono); font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 400; color: var(--ink); line-height: 1.2; letter-spacing: -0.02em; }
+.header-desc { font-size: 0.88rem; color: var(--ink-3); margin-top: 12px; font-style: italic; font-family: var(--mono); font-weight: 300; }
+
+.section { margin-bottom: 72px; }
+.section-head { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.section-num { font-family: var(--mono); font-size: 0.65rem; color: var(--ink-3); letter-spacing: 0.1em; }
+.section-title { font-family: var(--mono); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; color: var(--ink); }
+.section-head::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+.uml-wrap { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; background: var(--white); border: 1px solid var(--line-2); }
+.uml-box { width: 220px; border: 1px solid var(--ink-2); }
+.uml-box-head { padding: 10px 14px; border-bottom: 1px solid var(--line-2); font-family: var(--mono); font-size: 0.73rem; font-weight: 500; }
+.uml-box-head.base { background: var(--ink); color: var(--white); }
+.uml-box-head.student { background: var(--student); color: var(--white); }
+.uml-box-head.teacher { background: var(--teacher); color: var(--white); }
+.uml-box-body { padding: 10px 14px; font-family: var(--mono); font-size: 0.64rem; line-height: 1.9; background: var(--white); }
+.uml-p { color: var(--ink-2); }
+.uml-m { color: var(--ink-3); font-style: italic; }
+.uml-hr { border: none; border-top: 1px solid var(--line); margin: 6px 0; }
+.uml-vert { width: 1px; height: 28px; background: var(--line-2); }
+.uml-arrow-up { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid var(--line-2); }
+.uml-row { display: flex; align-items: flex-start; }
+.uml-horiz { height: 1px; width: 72px; background: var(--line-2); margin-top: 28px; }
+.uml-branch { display: flex; flex-direction: column; align-items: center; }
+
+.code-panel { background: var(--white); border: 1px solid var(--line-2); }
+.code-tabs { display: flex; border-bottom: 1px solid var(--line-2); overflow-x: auto; }
+.code-tab { padding: 12px 18px; font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s; white-space: nowrap; letter-spacing: 0.04em; }
+.code-tab:hover { color: var(--ink); }
+.code-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.code-body { display: none; padding: 28px 32px; overflow-x: auto; }
+.code-body.active { display: block; }
+pre { font-family: var(--mono); font-size: 0.73rem; line-height: 1.8; white-space: pre; color: var(--ink-2); }
+.kw  { color: #111110; font-weight: 500; }
+.cl  { color: #2d6a4f; }
+.fn  { color: #7b3f00; }
+.str { color: #555550; }
+.cm  { color: #bbbbaa; font-style: italic; }
+.num { color: #111110; }
+.prop{ color: #444440; }
+
+.filter-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.f-btn { padding: 6px 14px; font-family: var(--mono); font-size: 0.68rem; border: 1px solid var(--line-2); background: var(--white); color: var(--ink-3); cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; }
+.f-btn:hover { border-color: var(--ink); color: var(--ink); }
+.f-btn.on-all     { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.f-btn.on-student { background: var(--student); color: var(--white); border-color: var(--student); }
+.f-btn.on-teacher { background: var(--teacher); color: var(--white); border-color: var(--teacher); }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line-2); }
+.card { background: var(--white); padding: 24px; display: flex; flex-direction: column; gap: 16px; animation: up 0.3s ease both; }
+@keyframes up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.card-name { font-family: var(--mono); font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+.card-tag { font-family: var(--mono); font-size: 0.6rem; padding: 3px 8px; letter-spacing: 0.08em; }
+.tag-s { background: #e8f5ee; color: var(--student); }
+.tag-t { background: #f8ede0; color: var(--teacher); }
+.card-props { display: flex; flex-direction: column; gap: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
+.prop-line { display: flex; align-items: baseline; gap: 10px; font-family: var(--mono); font-size: 0.68rem; }
+.pk { color: var(--ink-3); min-width: 88px; flex-shrink: 0; }
+.pv { color: var(--ink); }
+.pv.inh { color: var(--ink-3); }
+.card-output { padding: 14px; background: var(--bg); border-left: 2px solid var(--line-2); }
+.out-label { font-family: var(--mono); font-size: 0.58rem; color: var(--ink-3); letter-spacing: 0.12em; margin-bottom: 8px; text-transform: uppercase; }
+.out-line { font-family: var(--mono); font-size: 0.66rem; color: var(--ink-2); line-height: 1.7; }
+.out-line .ov { color: var(--ink); font-weight: 500; }
+
+.poly-section { background: var(--white); border: 1px solid var(--line-2); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.7rem; }
+th { padding: 12px 16px; text-align: left; font-size: 0.6rem; letter-spacing: 0.12em; color: var(--ink-3); font-weight: 400; border-bottom: 1px solid var(--line-2); background: var(--bg); }
+td { padding: 13px 16px; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: top; line-height: 1.5; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+.tc-s { color: var(--student); }
+.tc-t { color: var(--teacher); }
+.tc-base { color: var(--ink-3); font-style: italic; }
+
+@media (max-width: 600px) {
+  .page { padding: 0 16px 80px; }
+  .uml-row { flex-direction: column; align-items: center; }
+  .uml-horiz { display: none; }
+  .cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="eyebrow">JavaScript ES6+ · OOP · Class Inheritance</div>
+  <h1>Person → Student | Teacher<br>Class Hierarchy</h1>
+  <p class="header-desc">// method overriding, polymorphism, instanceof checks</p>
+</header>
+
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">UML_DIAGRAM</span></div>
+  <div class="uml-wrap">
+    <div class="uml-box">
+      <div class="uml-box-head base">Person</div>
+      <div class="uml-box-body">
+        <div class="uml-p">+ name : String</div>
+        <div class="uml-p">+ age : Number</div>
+        <div class="uml-p">+ email : String</div>
+        <hr class="uml-hr">
+        <div class="uml-m">+ getRole() : String</div>
+        <div class="uml-m">+ getInfo() : String</div>
+        <div class="uml-m">+ introduce() : String</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="uml-vert"></div>
+      <div style="display:flex;"><div class="uml-horiz"></div><div class="uml-horiz"></div></div>
+    </div>
+    <div class="uml-row">
+      <div class="uml-branch">
+        <div style="display:flex;flex-direction:column;align-items:center;"><div class="uml-vert"></div><div class="uml-arrow-up"></div></div>
+        <div class="uml-box">
+          <div class="uml-box-head student">Student</div>
+          <div class="uml-box-body">
+            <div style="color:var(--ink-3);font-size:0.6rem;margin-bottom:4px;">extends Person</div>
+            <div class="uml-p">+ studentId : String</div>
+            <div class="uml-p">+ major : String</div>
+            <div class="uml-p">+ gpa : Number</div>
+            <hr class="uml-hr">
+            <div class="uml-m">@override getRole()</div>
+            <div class="uml-m">@override getInfo()</div>
+            <div class="uml-m">+ study()</div>
+            <div class="uml-m">+ getGradeStatus()</div>
+          </div>
+        </div>
+      </div>
+      <div style="width:144px;"></div>
+      <div class="uml-branch">
+        <div style="display:flex;flex-direction:column;align-items:center;"><div class="uml-vert"></div><div class="uml-arrow-up"></div></div>
+        <div class="uml-box">
+          <div class="uml-box-head teacher">Teacher</div>
+          <div class="uml-box-body">
+            <div style="color:var(--ink-3);font-size:0.6rem;margin-bottom:4px;">extends Person</div>
+            <div class="uml-p">+ employeeId : String</div>
+            <div class="uml-p">+ department : String</div>
+            <div class="uml-p">+ subject : String</div>
+            <div class="uml-p">+ yearsExp : Number</div>
+            <hr class="uml-hr">
+            <div class="uml-m">@override getRole()</div>
+            <div class="uml-m">@override getInfo()</div>
+            <div class="uml-m">+ teach()</div>
+            <div class="uml-m">+ getSeniorityLevel()</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">SOURCE_CODE</span></div>
+  <div class="code-panel">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="showTab('person',this)">Person.js</button>
+      <button class="code-tab" onclick="showTab('student',this)">Student.js</button>
+      <button class="code-tab" onclick="showTab('teacher',this)">Teacher.js</button>
+      <button class="code-tab" onclick="showTab('poly',this)">polymorphism.js</button>
+    </div>
+    <div class="code-body active" id="tab-person"><pre><span class="cm">// Base class</span>
+<span class="kw">class</span> <span class="cl">Person</span> {
+  <span class="fn">constructor</span>(<span class="prop">name</span>, <span class="prop">age</span>, <span class="prop">email</span>) {
+    <span class="kw">this</span>.<span class="prop">name</span>  = <span class="prop">name</span>;
+    <span class="kw">this</span>.<span class="prop">age</span>   = <span class="prop">age</span>;
+    <span class="kw">this</span>.<span class="prop">email</span> = <span class="prop">email</span>;
+  }
+
+  <span class="fn">getRole</span>() { <span class="kw">return</span> <span class="str">"Person"</span>; }
+
+  <span class="fn">getInfo</span>() {
+    <span class="kw">return</span> <span class="str">`[<span class="prop">${this.getRole()}</span>] <span class="prop">${this.name}</span>, Age: <span class="prop">${this.age}</span>`</span>;
+  }
+
+  <span class="fn">introduce</span>() {
+    <span class="kw">return</span> <span class="str">`Hi, I'm <span class="prop">${this.name}</span> — a <span class="prop">${this.getRole()}</span>.`</span>;
+  }
+}</pre></div>
+    <div class="code-body" id="tab-student"><pre><span class="cm">// Student extends Person</span>
+<span class="kw">class</span> <span class="cl">Student</span> <span class="kw">extends</span> <span class="cl">Person</span> {
+  <span class="fn">constructor</span>(<span class="prop">name</span>, <span class="prop">age</span>, <span class="prop">email</span>, <span class="prop">studentId</span>, <span class="prop">major</span>, <span class="prop">gpa</span>) {
+    <span class="kw">super</span>(<span class="prop">name</span>, <span class="prop">age</span>, <span class="prop">email</span>);
+    <span class="kw">this</span>.<span class="prop">studentId</span> = <span class="prop">studentId</span>;
+    <span class="kw">this</span>.<span class="prop">major</span>     = <span class="prop">major</span>;
+    <span class="kw">this</span>.<span class="prop">gpa</span>       = <span class="prop">gpa</span>;
+  }
+
+  <span class="cm">// @override</span>
+  <span class="fn">getRole</span>() { <span class="kw">return</span> <span class="str">"Student"</span>; }
+
+  <span class="cm">// @override — calls super.getInfo()</span>
+  <span class="fn">getInfo</span>() {
+    <span class="kw">return</span> <span class="str">`<span class="prop">${super.getInfo()}</span> | Major: <span class="prop">${this.major}</span> | GPA: <span class="prop">${this.gpa}</span>`</span>;
+  }
+
+  <span class="fn">study</span>() {
+    <span class="kw">return</span> <span class="str">`<span class="prop">${this.name}</span> is studying <span class="prop">${this.major}</span>.`</span>;
+  }
+
+  <span class="fn">getGradeStatus</span>() {
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">gpa</span> >= <span class="num">3.7</span>) <span class="kw">return</span> <span class="str">"Dean's List"</span>;
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">gpa</span> >= <span class="num">3.0</span>) <span class="kw">return</span> <span class="str">"Good Standing"</span>;
+    <span class="kw">return</span> <span class="str">"Needs Improvement"</span>;
+  }
+}</pre></div>
+    <div class="code-body" id="tab-teacher"><pre><span class="cm">// Teacher extends Person</span>
+<span class="kw">class</span> <span class="cl">Teacher</span> <span class="kw">extends</span> <span class="cl">Person</span> {
+  <span class="fn">constructor</span>(<span class="prop">name</span>, <span class="prop">age</span>, <span class="prop">email</span>, <span class="prop">empId</span>, <span class="prop">dept</span>, <span class="prop">subject</span>, <span class="prop">yrs</span>) {
+    <span class="kw">super</span>(<span class="prop">name</span>, <span class="prop">age</span>, <span class="prop">email</span>);
+    <span class="kw">this</span>.<span class="prop">employeeId</span> = <span class="prop">empId</span>;
+    <span class="kw">this</span>.<span class="prop">department</span> = <span class="prop">dept</span>;
+    <span class="kw">this</span>.<span class="prop">subject</span>    = <span class="prop">subject</span>;
+    <span class="kw">this</span>.<span class="prop">yearsExp</span>   = <span class="prop">yrs</span>;
+  }
+
+  <span class="cm">// @override</span>
+  <span class="fn">getRole</span>() { <span class="kw">return</span> <span class="str">"Teacher"</span>; }
+
+  <span class="cm">// @override — calls super.getInfo()</span>
+  <span class="fn">getInfo</span>() {
+    <span class="kw">return</span> <span class="str">`<span class="prop">${super.getInfo()}</span> | <span class="prop">${this.department}</span> | <span class="prop">${this.yearsExp}</span>yr exp`</span>;
+  }
+
+  <span class="fn">teach</span>() {
+    <span class="kw">return</span> <span class="str">`<span class="prop">${this.name}</span> is teaching <span class="prop">${this.subject}</span>.`</span>;
+  }
+
+  <span class="fn">getSeniorityLevel</span>() {
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">yearsExp</span> >= <span class="num">15</span>) <span class="kw">return</span> <span class="str">"Senior Faculty"</span>;
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">yearsExp</span> >= <span class="num">5</span>)  <span class="kw">return</span> <span class="str">"Associate"</span>;
+    <span class="kw">return</span> <span class="str">"Junior Faculty"</span>;
+  }
+}</pre></div>
+    <div class="code-body" id="tab-poly"><pre><span class="cm">// Polymorphism — same call, different behavior per class</span>
+<span class="kw">const</span> <span class="prop">people</span> = [
+  <span class="kw">new</span> <span class="cl">Student</span>(<span class="str">"Alice"</span>, <span class="num">20</span>, <span class="str">"alice@uni.edu"</span>, <span class="str">"S-001"</span>, <span class="str">"CS"</span>, <span class="num">3.9</span>),
+  <span class="kw">new</span> <span class="cl">Teacher</span>(<span class="str">"Dr. Chen"</span>, <span class="num">45</span>, <span class="str">"chen@uni.edu"</span>, <span class="str">"T-001"</span>, <span class="str">"Eng"</span>, <span class="str">"Algorithms"</span>, <span class="num">18</span>),
+  <span class="kw">new</span> <span class="cl">Student</span>(<span class="str">"Marcus"</span>, <span class="num">22</span>, <span class="str">"marcus@uni.edu"</span>, <span class="str">"S-002"</span>, <span class="str">"Math"</span>, <span class="num">3.2</span>),
+];
+
+<span class="prop">people</span>.<span class="fn">forEach</span>(<span class="prop">p</span> => {
+  <span class="prop">console</span>.<span class="fn">log</span>(<span class="prop">p</span>.<span class="fn">getInfo</span>());    <span class="cm">// polymorphic — each class responds differently</span>
+  <span class="prop">console</span>.<span class="fn">log</span>(<span class="prop">p</span>.<span class="fn">introduce</span>());  <span class="cm">// inherited, uses overridden getRole()</span>
+  <span class="prop">console</span>.<span class="fn">log</span>(<span class="prop">p</span> <span class="kw">instanceof</span> <span class="cl">Person</span>); <span class="cm">// → true for all</span>
+});</pre></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">INSTANCES</span></div>
+  <div class="filter-row">
+    <button class="f-btn on-all" onclick="filter('all',this)">all</button>
+    <button class="f-btn" onclick="filter('student',this)">student</button>
+    <button class="f-btn" onclick="filter('teacher',this)">teacher</button>
+  </div>
+  <div class="cards" id="cards"></div>
+</div>
+
+<div class="section">
+  <div class="section-head"><span class="section-num">04</span><span class="section-title">POLYMORPHISM_TABLE</span></div>
+  <div class="poly-section"><table id="poly-table"></table></div>
+</div>
+
+</div>
+<script>
+class Person {
+  constructor(n,a,e){this.name=n;this.age=a;this.email=e;}
+  getRole(){return"Person";}
+  getInfo(){return`[${this.getRole()}] ${this.name}, Age: ${this.age}`;}
+  introduce(){return`Hi, I'm ${this.name} — a ${this.getRole()}.`;}
+}
+class Student extends Person {
+  constructor(n,a,e,sid,maj,gpa){super(n,a,e);this.studentId=sid;this.major=maj;this.gpa=gpa;}
+  getRole(){return"Student";}
+  getInfo(){return`${super.getInfo()} | Major: ${this.major} | GPA: ${this.gpa}`;}
+  study(){return`${this.name} is studying ${this.major}.`;}
+  getGradeStatus(){return this.gpa>=3.7?"Dean's List":this.gpa>=3.0?"Good Standing":"Needs Improvement";}
+}
+class Teacher extends Person {
+  constructor(n,a,e,eid,dept,sub,yrs){super(n,a,e);this.employeeId=eid;this.department=dept;this.subject=sub;this.yearsExp=yrs;}
+  getRole(){return"Teacher";}
+  getInfo(){return`${super.getInfo()} | ${this.department} | ${this.yearsExp}yr exp`;}
+  teach(){return`${this.name} is teaching ${this.subject}.`;}
+  getSeniorityLevel(){return this.yearsExp>=15?"Senior Faculty":this.yearsExp>=5?"Associate":"Junior Faculty";}
+}
+
+const data=[
+  new Student("Alice Zhang",20,"alice@uni.edu","S-001","Computer Science",3.9),
+  new Student("Marcus Webb",22,"marcus@uni.edu","S-002","Mathematics",3.2),
+  new Student("Priya Nair",21,"priya@uni.edu","S-003","Physics",3.8),
+  new Teacher("Dr. Elena Chen",45,"chen@uni.edu","T-001","Engineering","Algorithms",18),
+  new Teacher("Prof. James K.",38,"james@uni.edu","T-002","Sciences","Quantum Mechanics",8),
+  new Teacher("Ms. Sara Okon",29,"sara@uni.edu","T-003","Humanities","Literature",3),
+];
+
+function buildCards(type){
+  const grid=document.getElementById("cards");
+  grid.innerHTML="";
+  data.filter(p=>type==="all"||p.getRole().toLowerCase()===type).forEach((p,i)=>{
+    const isS=p instanceof Student;
+    const card=document.createElement("div");
+    card.className="card";
+    card.style.animationDelay=(i*50)+"ms";
+    const specific=isS
+      ?`<div class="prop-line"><span class="pk">.studentId</span><span class="pv">${p.studentId}</span></div>
+        <div class="prop-line"><span class="pk">.major</span><span class="pv">${p.major}</span></div>
+        <div class="prop-line"><span class="pk">.gpa</span><span class="pv">${p.gpa} — ${p.getGradeStatus()}</span></div>`
+      :`<div class="prop-line"><span class="pk">.employeeId</span><span class="pv">${p.employeeId}</span></div>
+        <div class="prop-line"><span class="pk">.department</span><span class="pv">${p.department}</span></div>
+        <div class="prop-line"><span class="pk">.subject</span><span class="pv">${p.subject}</span></div>
+        <div class="prop-line"><span class="pk">.seniority</span><span class="pv">${p.getSeniorityLevel()}</span></div>`;
+    const action=isS?p.study():p.teach();
+    card.innerHTML=`
+      <div class="card-top">
+        <div class="card-name">${p.name}</div>
+        <span class="card-tag ${isS?"tag-s":"tag-t"}">${p.getRole()}</span>
+      </div>
+      <div class="card-props">
+        <div class="prop-line"><span class="pk">.name</span><span class="pv inh">"${p.name}"</span></div>
+        <div class="prop-line"><span class="pk">.age</span><span class="pv inh">${p.age}</span></div>
+        <div class="prop-line"><span class="pk">.email</span><span class="pv inh">${p.email}</span></div>
+        ${specific}
+      </div>
+      <div class="card-output">
+        <div class="out-label">method output</div>
+        <div class="out-line">getRole() → <span class="ov">"${p.getRole()}"</span></div>
+        <div class="out-line">introduce() → ${p.introduce()}</div>
+        <div class="out-line" style="margin-top:4px;color:#aaa">${action}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function buildTable(){
+  const t=document.getElementById("poly-table");
+  t.innerHTML=`<tr><th>instance</th><th>instanceof Person</th><th>getRole()</th><th>getInfo() output</th></tr>`;
+  data.forEach(p=>{
+    const isS=p instanceof Student;
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td class="${isS?"tc-s":"tc-t"}">${p.getRole()}("${p.name}")</td>
+      <td>true</td>
+      <td class="tc-base">"${p.getRole()}"</td>
+      <td>${p.getInfo()}</td>`;
+    t.appendChild(tr);
+  });
+}
+
+function filter(type,btn){
+  document.querySelectorAll(".f-btn").forEach(b=>b.className="f-btn");
+  btn.className=`f-btn on-${type}`;
+  buildCards(type);
+}
+
+function showTab(id,btn){
+  document.querySelectorAll(".code-tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".code-body").forEach(c=>c.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  btn.classList.add("active");
+}
+
+buildCards("all");
+buildTable();
+</script>
+</body>
+</html>
